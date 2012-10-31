@@ -6,7 +6,7 @@ namespace TradeGame
 
 enum AssetType
 {
-    NONE, SILVER, GOLD, PLATINUM
+    SILVER, GOLD, PLATINUM
 };
 
 typedef struct
@@ -23,12 +23,11 @@ typedef struct
 
     AssetType buyingType;
     unsigned int buyingVolume;
-
 } Bid;
 
 typedef struct
 {
-    Bid trade;
+    Bid bid;
     unsigned int seller;
     unsigned int buyer;
 } Trade;

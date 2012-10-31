@@ -12,7 +12,7 @@ public:
 
     TradeGame::Bid inviteBid();
 
-    unsigned int selectBestMach(const std::vector<TradeGame::Bid>& bids);
+    unsigned int selectBestMatch(const std::vector<TradeGame::Bid>& bids);
     void addAssets(int dSilver, int dGold, int dPlatinum);
 
     TradeGame::Assets getAssets() const;

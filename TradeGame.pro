@@ -12,11 +12,17 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    testagent.cpp
+    testagent.cpp \
+    blackboard.cpp \
+    tradingfloor.cpp \
+    bidlist.cpp
 
 HEADERS  += mainwindow.h \
     types.h \
     testagent.h \
-    agent.h
+    agent.h \
+    blackboard.h \
+    tradingfloor.h \
+    bidlist.h
 
 FORMS    += mainwindow.ui
