@@ -22,6 +22,9 @@ private:
 
     void updateUI();
     void updateRanking();
+    void updateHistory();
+    static QString getAssetName(TradeGame::AssetType asset);
+
     static bool agentSortPredicate(std::pair<unsigned int,TradeGame::Agent*> a, std::pair<unsigned int,TradeGame::Agent*> b);
 
 private slots:

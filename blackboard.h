@@ -21,7 +21,7 @@ public:
     void runMarket();
     void penalize();
     const std::vector<TradeGame::Trade>& getHistory() const {return history;}
-    const std::map<unsigned int,TradeGame::Agent*> getAgents() const {return agents;}
+    const std::map<unsigned int,TradeGame::Agent*>& getAgents() const {return agents;}
     void setR(double r) {rFactor = r;}
     void restart();
 

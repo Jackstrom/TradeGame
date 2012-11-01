@@ -41,6 +41,7 @@ void BlackBoard::restart()
         delete it->second;
     }
     agents.clear();
+    history.clear();
     init();
 }
 
