@@ -43,6 +43,7 @@ void BlackBoard::restart()
     agents.clear();
     history.clear();
     lastHistory.clear();
+    lastBids.clear();
     init();
 }
 

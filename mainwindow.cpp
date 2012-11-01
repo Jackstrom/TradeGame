@@ -119,7 +119,28 @@ void MainWindow::updateHistory()
 
 void MainWindow::updateLastBids()
 {
+    const std::vector<TradeGame::Trade>& bids = manager->getLastBids();
+    std::map<unsigned int,TradeGame::Agent*> agents = manager->getAgents();
+    QStringList list;
+    for(std::vector<TradeGame::Trade>::const_iterator it=bids.begin(); it!=bids.end(); it++)
+    {
+        QString item("(");
+        item.append(QString::number(it->seller));
+        item.append(") ");
+        item.append(QString::fromStdString(agents[it->seller]->getName()));
+        item.append(" :\t");
+        item.append(QString::number(it->bid.sellingVolume));
+        item.append(" ");
+        item.append(getAssetName(it->bid.sellingType));
+        item.append(" ==> ");
+        item.append(QString::number(it->bid.buyingVolume));
+        item.append(" ");
+        item.append(getAssetName(it->bid.buyingType));
 
+        list.push_back(item);
+    }
+    QStringListModel* model = new QStringListModel(list, this);
+    ui->listBids->setModel(model);
 }
 
 void MainWindow::updateLastTrades()
