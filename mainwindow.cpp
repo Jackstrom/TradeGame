@@ -22,7 +22,7 @@ void MainWindow::btnStartRound()
     manager->setR(ui->spinR->value());
     int iterations = ui->spinIterations->value();
     for(int i=0; i<iterations; i++)
-        manager->runMarket();
+        manager->runMarket(i==iterations-1);
     manager->penalize();
 
     updateUI();
@@ -31,13 +31,15 @@ void MainWindow::btnStartRound()
 void MainWindow::btnRestart()
 {
     manager->restart();
-    updateRanking();
+    updateUI();
 }
 
 void MainWindow::updateUI()
 {
     updateRanking();
     updateHistory();
+    updateLastBids();
+    updateLastTrades();
 }
 
 void MainWindow::updateRanking()
@@ -113,6 +115,42 @@ void MainWindow::updateHistory()
     }
     QStringListModel* model = new QStringListModel(list, this);
     ui->listHistory->setModel(model);
+}
+
+void MainWindow::updateLastBids()
+{
+
+}
+
+void MainWindow::updateLastTrades()
+{
+    const std::vector<TradeGame::Trade>& history = manager->getLastHistory();
+    std::map<unsigned int,TradeGame::Agent*> agents = manager->getAgents();
+    QStringList list;
+    for(std::vector<TradeGame::Trade>::const_iterator it=history.begin(); it!=history.end(); it++)
+    {
+        QString item("(");
+        item.append(QString::number(it->seller));
+        item.append(") ");
+        item.append(QString::fromStdString(agents[it->seller]->getName()));
+        item.append(" : ");
+        item.append(QString::number(it->bid.sellingVolume));
+        item.append(" ");
+        item.append(getAssetName(it->bid.sellingType));
+        item.append("\t<==>\t");
+        item.append(QString::number(it->bid.buyingVolume));
+        item.append(" ");
+        item.append(getAssetName(it->bid.buyingType));
+        item.append(" : ");
+        item.append("(");
+        item.append(QString::number(it->buyer));
+        item.append(") ");
+        item.append(QString::fromStdString(agents[it->buyer]->getName()));
+
+        list.push_back(item);
+    }
+    QStringListModel* model = new QStringListModel(list, this);
+    ui->listTrades->setModel(model);
 }
 
 bool MainWindow::agentSortPredicate(std::pair<unsigned int,TradeGame::Agent*> a, std::pair<unsigned int,TradeGame::Agent*> b)

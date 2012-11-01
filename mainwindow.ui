@@ -45,7 +45,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Current round</string>
+          <string>Last round</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignBottom|Qt::AlignHCenter</set>

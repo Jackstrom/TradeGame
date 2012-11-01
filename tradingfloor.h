@@ -14,6 +14,7 @@ public:
     TradeGame::Trade getTrade(unsigned int bidder);
     std::vector<TradeGame::Trade> checkMatchingBids(unsigned int seller);
     void removeBids(unsigned int seller, unsigned int buyer);
+    const std::vector<TradeGame::Trade>& getTrades() const {return trades;}
 
 private:
     std::vector<TradeGame::Trade> trades;

@@ -42,6 +42,7 @@ void BlackBoard::restart()
     }
     agents.clear();
     history.clear();
+    lastHistory.clear();
     init();
 }
 
@@ -78,7 +79,7 @@ TradeGame::Assets BlackBoard::generateAssets() const
     return assets;
 }
 
-void BlackBoard::runMarket()
+void BlackBoard::runMarket(bool retainData)
 {
     iterations++;
 
@@ -97,9 +98,14 @@ void BlackBoard::runMarket()
 
     //invite bids
     inviteBidsAndAddToFloor();
+    if(retainData)
+    {
+        lastBids = floor->getTrades();
+        lastHistory.clear();
+    }
 
     //present bids
-    presentBids();
+    presentBids(retainData);
 }
 
 void BlackBoard::inviteBidsAndAddToFloor()
@@ -114,7 +120,7 @@ void BlackBoard::inviteBidsAndAddToFloor()
     }
 }
 
-void BlackBoard::presentBids()
+void BlackBoard::presentBids(const bool retainData)
 {
     BidList::Iterator it = bidList->iterate();
     while(it.hasNext())
@@ -151,7 +157,7 @@ void BlackBoard::presentBids()
         floor->removeBids(partA, partB);
         it.remove(partA, partB);
 
-        finalizeTrade(finalPartATrade);
+        finalizeTrade(finalPartATrade, retainData);
 /*
         TradeGame::Assets partAPost = agents[partA]->getAssets();
         TradeGame::Assets partBPost = agents[partB]->getAssets();
@@ -170,7 +176,7 @@ TradeGame::Trade BlackBoard::resolveConflict(const TradeGame::Trade& seller, con
     return final;
 }
 
-void BlackBoard::finalizeTrade(TradeGame::Trade& trade)
+void BlackBoard::finalizeTrade(const TradeGame::Trade& trade, const bool retainData)
 {
     TradeGame::Agent* seller = agents[trade.seller];
     TradeGame::Agent* buyer = agents[trade.buyer];
@@ -181,6 +187,8 @@ void BlackBoard::finalizeTrade(TradeGame::Trade& trade)
     buyer->addAssets(-sellerChange.silver, -sellerChange.gold, -sellerChange.platinum);
 
     //history
+    if(retainData)
+        lastHistory.push_back(trade);
     history.push_back(trade);
 }
 
@@ -198,7 +206,7 @@ bool BlackBoard::verifyAssets(TradeGame::AssetType type, int amount, TradeGame::
     return false;
 }
 
-TradeGame::Assets BlackBoard::createSellerChange(TradeGame::Bid &bid)
+TradeGame::Assets BlackBoard::createSellerChange(const TradeGame::Bid &bid)
 {
     TradeGame::Assets assets = {0,0,0};
     switch(bid.sellingType)
