@@ -19,6 +19,7 @@ public:
     ~BlackBoard();
 
     void runMarket();
+    void penalize();
     const std::vector<TradeGame::Trade>& getHistory() const {return history;}
 
 private:
@@ -29,9 +30,10 @@ private:
     void finalizeTrade(TradeGame::Trade& trade);
     bool verifyAssets(TradeGame::AssetType type, int amount, TradeGame::Agent* agent) const;
     TradeGame::Assets createSellerChange(TradeGame::Bid& bid);
-    void penalize();
 
-
+    const TradeGame::Assets initAssets;
+    const double rFactor;
+    int iterations;
     std::map<unsigned int,TradeGame::Agent*> agents;
     TradingFloor* floor;
     BidList* bidList;

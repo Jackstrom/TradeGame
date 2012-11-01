@@ -1,11 +1,15 @@
 #include "blackboard.h"
 #include "testagent.h"
 
+#include <cstdio>
+
 BlackBoard::BlackBoard(QObject * parent) :
-    QObject(parent)
+    QObject(parent),
+    initAssets((TradeGame::Assets){100,100,100}),
+    rFactor(0.2),
+    iterations(0)
 {
     init();
-    runMarket();
 }
 
 BlackBoard::~BlackBoard()
@@ -30,6 +34,8 @@ void BlackBoard::init()
 
 void BlackBoard::runMarket()
 {
+    iterations++;
+
     //init agents, create bidlist
     bidList->create(agents);
 
@@ -38,9 +44,6 @@ void BlackBoard::runMarket()
 
     //present bids
     presentBids();
-
-    //penalize
-    penalize();
 }
 
 void BlackBoard::inviteBidsAndAddToFloor()
@@ -157,13 +160,23 @@ TradeGame::Assets BlackBoard::createSellerChange(TradeGame::Bid &bid)
 
 void BlackBoard::penalize()
 {
-    BidList::Iterator it = bidList->iterate();
-    while(it.hasNext())
+    if(history.empty())
+        return;
+    for(std::map<unsigned int,TradeGame::Agent*>::const_iterator it=agents.begin(); it!=agents.end(); it++)
     {
-        TradeGame::Agent* agent = agents[it.next()];
-        TradeGame::Assets assets = agent->getAssets();
-        TradeGame::Assets penalty = {0,0,0};
-        //TODO
-        agent->addAssets(penalty.silver, penalty.gold, penalty.platinum);
+        int nrDeals = 0;
+        for(std::vector<TradeGame::Trade>::const_iterator itH=history.begin(); itH!=history.end(); itH++)
+        {
+            if(itH->seller == it->first || itH->buyer == it->first)
+                nrDeals++;
+        }
+        //int totalDeals = history.size();
+        TradeGame::Agent* agent = it->second;
+        int silverLoss = -rFactor * (1.0 - (float(nrDeals) / iterations)) * initAssets.silver;
+        int goldLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets.gold;
+        int platinumLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets.platinum;
+
+        printf("Penalty for agent %u (%i / %i deals): %i, %i, %i\n", it->first, nrDeals, iterations, silverLoss, goldLoss, platinumLoss);
+        agent->addAssets(silverLoss, goldLoss, platinumLoss);
     }
 }

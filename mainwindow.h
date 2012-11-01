@@ -19,6 +19,9 @@ public:
 private:
     Ui::MainWindow *ui;
     BlackBoard * manager;
+
+private slots:
+    void btnStartRound();
 };
 
 #endif // MAINWINDOW_H
