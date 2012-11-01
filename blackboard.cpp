@@ -1,13 +1,14 @@
 #include "blackboard.h"
 #include "testagent.h"
+#include <cstdlib>
 
 #include <cstdio>
 
 BlackBoard::BlackBoard(QObject * parent) :
     QObject(parent),
-    initAssets((TradeGame::Assets){100,100,100}),
     rFactor(0.2),
-    iterations(0)
+    iterations(0),
+    insertIndex(0)
 {
     init();
 }
@@ -28,9 +29,41 @@ void BlackBoard::init()
     bidList = new BidList();
     for(unsigned int i=0; i<100; i++)
     {
-        agents[i] = new TestAgent();
-        agents[i]->setAssets(initAssets);
+        addAgent(new TestAgent());
     }
+}
+
+void BlackBoard::addAgent(TradeGame::Agent *agent)
+{
+    TradeGame::Assets assets = generateAssets();
+    agent->setAssets(assets);
+    printf("Agent %u initialized with assets %i, %i, %i\n", insertIndex, assets.silver, assets.gold, assets.platinum);
+    initAssets[insertIndex] = assets;
+    agents[insertIndex++] = agent;
+}
+
+TradeGame::Assets BlackBoard::generateAssets() const
+{
+    TradeGame::Assets assets = {0,0,0};
+    int remainingValue = TOTAL_ASSET_VALUE;
+    int startAsset = rand() % 2;
+    if(startAsset) // start with platinum
+    {
+        assets.platinum = rand() % (remainingValue / PLATINUM_VALUE + 1);
+        remainingValue -= assets.platinum * PLATINUM_VALUE;
+        assets.gold = rand() % (remainingValue / GOLD_VALUE + 1);
+        remainingValue -= assets.gold * GOLD_VALUE;
+    }
+    else // start with gold
+    {
+        assets.gold = rand() % (remainingValue / GOLD_VALUE + 1);
+        remainingValue -= assets.gold * GOLD_VALUE;
+        assets.platinum = rand() % (remainingValue / PLATINUM_VALUE + 1);
+        remainingValue -= assets.platinum * PLATINUM_VALUE;
+    }
+    assets.silver = remainingValue / SILVER_VALUE; // dump the rest into silver
+
+    return assets;
 }
 
 void BlackBoard::runMarket()
@@ -76,7 +109,9 @@ void BlackBoard::presentBids()
         {
             simplified.push_back(jt->bid);
         }
-        unsigned int selected = agents[bidder]->selectBestMatch(simplified);
+        int selected = agents[bidder]->selectBestMatch(simplified);
+        if(selected < 0 || selected > int(simplified.size()))
+            continue;
         TradeGame::Trade selectedTrade = matches.at(selected);
         TradeGame::Trade bid = floor->getTrade(bidder);
         TradeGame::Trade finalTrade = resolveConflict(bid, selectedTrade);
@@ -163,6 +198,7 @@ void BlackBoard::penalize()
 {
     if(history.empty())
         return;
+    printf("\nPenalties:\n");
     for(std::map<unsigned int,TradeGame::Agent*>::const_iterator it=agents.begin(); it!=agents.end(); it++)
     {
         int nrDeals = 0;
@@ -173,9 +209,9 @@ void BlackBoard::penalize()
         }
         //int totalDeals = history.size();
         TradeGame::Agent* agent = it->second;
-        int silverLoss = -rFactor * (1.0 - (float(nrDeals) / iterations)) * initAssets.silver;
-        int goldLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets.gold;
-        int platinumLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets.platinum;
+        int silverLoss = -rFactor * (1.0 - (float(nrDeals) / iterations)) * initAssets[it->first].silver;
+        int goldLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets[it->first].gold;
+        int platinumLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets[it->first].platinum;
 
         printf("Penalty for agent %s (%i / %i deals): %i, %i, %i\n", it->second->getName().c_str(), nrDeals, iterations, silverLoss, goldLoss, platinumLoss);
         agent->addAssets(silverLoss, goldLoss, platinumLoss);

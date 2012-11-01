@@ -1,7 +1,13 @@
 #include "testagent.h"
+#include <string>
+#include <sstream>
 
 TestAgent::TestAgent()
 {
+    static unsigned int nr = 0;
+    std::ostringstream buffer;
+    buffer << "TestAgent" << nr++;
+    name = buffer.str();
 }
 
 bool TestAgent::start()
@@ -51,10 +57,10 @@ TradeGame::Bid TestAgent::inviteBid()
     return bid;
 }
 
-unsigned int TestAgent::selectBestMatch(const std::vector<TradeGame::Bid>& bids)
+int TestAgent::selectBestMatch(const std::vector<TradeGame::Bid>& bids)
 {
     unsigned int maxRatio = 0;
-    unsigned int selected = 0;
+    int selected = 0;
     for(unsigned int i=0; i<bids.size(); i++)
     {
         const TradeGame::Bid& bid = bids.at(i);
@@ -62,7 +68,7 @@ unsigned int TestAgent::selectBestMatch(const std::vector<TradeGame::Bid>& bids)
         if(ratio > maxRatio)
         {
             maxRatio = ratio;
-            selected = i;
+            selected = int(i);
         }
     }
     return selected;

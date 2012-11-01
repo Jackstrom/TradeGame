@@ -12,17 +12,18 @@ public:
 
     TradeGame::Bid inviteBid();
 
-    unsigned int selectBestMatch(const std::vector<TradeGame::Bid>& bids);
+    int selectBestMatch(const std::vector<TradeGame::Bid>& bids);
     void addAssets(int dSilver, int dGold, int dPlatinum);
 
     TradeGame::Assets getAssets() const {return assets;}
     void setAssets(const TradeGame::Assets& assets){this->assets = assets;}
-    const std::string getName() const {return "TestAgent007";}
+    const std::string getName() const {return name;}
 
     ~TestAgent(){}
 
 private:
     TradeGame::Assets assets;
+    std::string name;
 };
 
 #endif // TESTAGENT_H

@@ -23,8 +23,9 @@ public:
     /**
       * Returns the position in the vector.
       * Receiving agent is defined as buyer.
+      * Return negative number to not partake.
       */
-    virtual unsigned int selectBestMatch(const std::vector<Bid>& bids) = 0;
+    virtual int selectBestMatch(const std::vector<Bid>& bids) = 0;
     virtual void addAssets(int dSilver, int dGold, int dPlatinum) = 0;
 
     virtual Assets getAssets() const = 0;

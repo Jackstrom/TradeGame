@@ -20,6 +20,8 @@ private:
     Ui::MainWindow *ui;
     BlackBoard * manager;
 
+    void updateUI();
+
 private slots:
     void btnStartRound();
 };
