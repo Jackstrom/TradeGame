@@ -70,11 +70,7 @@ unsigned int TestAgent::selectBestMatch(const std::vector<TradeGame::Bid>& bids)
 
 void TestAgent::addAssets(int dSilver, int dGold, int dPlatinum)
 {
-
-}
-
-TradeGame::Assets TestAgent::getAssets() const
-{
-    TradeGame::Assets assets;
-    return assets;
+    assets.silver += dSilver;
+    assets.gold += dGold;
+    assets.platinum += dPlatinum;
 }

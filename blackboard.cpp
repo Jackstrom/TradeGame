@@ -29,6 +29,7 @@ void BlackBoard::init()
     for(unsigned int i=0; i<100; i++)
     {
         agents[i] = new TestAgent();
+        agents[i]->setAssets(initAssets);
     }
 }
 
@@ -176,7 +177,13 @@ void BlackBoard::penalize()
         int goldLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets.gold;
         int platinumLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets.platinum;
 
-        printf("Penalty for agent %u (%i / %i deals): %i, %i, %i\n", it->first, nrDeals, iterations, silverLoss, goldLoss, platinumLoss);
+        printf("Penalty for agent %s (%i / %i deals): %i, %i, %i\n", it->second->getName().c_str(), nrDeals, iterations, silverLoss, goldLoss, platinumLoss);
         agent->addAssets(silverLoss, goldLoss, platinumLoss);
+    }
+    printf("\nFinal assets:\n");
+    for(std::map<unsigned int,TradeGame::Agent*>::const_iterator it=agents.begin(); it!=agents.end(); it++)
+    {
+        TradeGame::Assets assets = it->second->getAssets();
+        printf("Assets for agent %s: %i, %i, %i\n", it->second->getName().c_str(), assets.silver, assets.gold, assets.platinum);
     }
 }

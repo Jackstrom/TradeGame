@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 #include "types.h"
 
 namespace TradeGame
@@ -27,6 +28,8 @@ public:
     virtual void addAssets(int dSilver, int dGold, int dPlatinum) = 0;
 
     virtual Assets getAssets() const = 0;
+    virtual void setAssets(const Assets& assets) = 0;
+    virtual const std::string getName() const = 0;
 
     virtual ~Agent(){}
 };
