@@ -22,6 +22,10 @@ public:
     void penalize();
     const std::vector<TradeGame::Trade>& getHistory() const {return history;}
     const std::map<unsigned int,TradeGame::Agent*> getAgents() const {return agents;}
+    void setR(double r) {rFactor = r;}
+    void restart();
+
+    static int calculateAssetValue(const TradeGame::Assets& assets);
 
     static const int SILVER_VALUE = 1;
     static const int GOLD_VALUE = 3;
@@ -40,7 +44,7 @@ private:
 
     static const int TOTAL_ASSET_VALUE = 100;
 
-    const double rFactor;
+    double rFactor;
     int iterations;
     unsigned int insertIndex;
     std::map<unsigned int,TradeGame::Agent*> agents;

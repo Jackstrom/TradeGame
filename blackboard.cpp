@@ -2,6 +2,7 @@
 #include "testagent.h"
 #include <cstdlib>
 
+#include <assert.h>
 #include <cstdio>
 
 BlackBoard::BlackBoard(QObject * parent) :
@@ -10,6 +11,8 @@ BlackBoard::BlackBoard(QObject * parent) :
     iterations(0),
     insertIndex(0)
 {
+    floor = new TradingFloor();
+    bidList = new BidList();
     init();
 }
 
@@ -25,12 +28,20 @@ BlackBoard::~BlackBoard()
 
 void BlackBoard::init()
 {
-    floor = new TradingFloor();
-    bidList = new BidList();
     for(unsigned int i=0; i<100; i++)
     {
         addAgent(new TestAgent());
     }
+}
+
+void BlackBoard::restart()
+{
+    for(std::map<unsigned int,TradeGame::Agent*>::iterator it = agents.begin(); it!=agents.end(); it++)
+    {
+        delete it->second;
+    }
+    agents.clear();
+    init();
 }
 
 void BlackBoard::addAgent(TradeGame::Agent *agent)
@@ -70,6 +81,16 @@ void BlackBoard::runMarket()
 {
     iterations++;
 
+    // prevent negatives
+    for(std::map<unsigned int,TradeGame::Agent*>::iterator it=agents.begin(); it!=agents.end(); it++)
+    {
+        TradeGame::Assets assets = it->second->getAssets();
+        assets.silver = std::max(assets.silver, 0);
+        assets.gold = std::max(assets.gold, 0);
+        assets.platinum = std::max(assets.platinum, 0);
+        it->second->setAssets(assets);
+    }
+
     //init agents, create bidlist
     bidList->create(agents);
 
@@ -97,8 +118,8 @@ void BlackBoard::presentBids()
     BidList::Iterator it = bidList->iterate();
     while(it.hasNext())
     {
-        unsigned int bidder = it.next();
-        std::vector<TradeGame::Trade> matches = floor->checkMatchingBids(bidder);
+        unsigned int partA = it.next();
+        std::vector<TradeGame::Trade> matches = floor->checkMatchingBids(partA);
         if(matches.empty())
         {
             continue;
@@ -109,16 +130,33 @@ void BlackBoard::presentBids()
         {
             simplified.push_back(jt->bid);
         }
-        int selected = agents[bidder]->selectBestMatch(simplified);
-        if(selected < 0 || selected > int(simplified.size()))
+        int selected = agents[partA]->selectBestMatch(simplified);
+        if( (selected < 0) || (selected > int(simplified.size())) )
             continue;
-        TradeGame::Trade selectedTrade = matches.at(selected);
-        TradeGame::Trade bid = floor->getTrade(bidder);
-        TradeGame::Trade finalTrade = resolveConflict(bid, selectedTrade);
-        floor->removeBids(finalTrade.seller, finalTrade.buyer);
-        it.remove(finalTrade.seller, finalTrade.buyer);
 
-        finalizeTrade(finalTrade);
+        TradeGame::Trade partBTrade = matches.at(selected);
+        unsigned int partB = partBTrade.seller;
+        TradeGame::Trade partATrade = floor->getTrade(partA);
+        TradeGame::Trade finalPartATrade = resolveConflict(partATrade, partBTrade);
+/*
+        TradeGame::Assets partAPre = agents[partA]->getAssets();
+        TradeGame::Assets partBPre = agents[partB]->getAssets();
+        */
+        //verify assets
+        if(!verifyAssets(finalPartATrade.bid.buyingType, finalPartATrade.bid.buyingVolume, agents[partB]) ||
+           !verifyAssets(finalPartATrade.bid.sellingType, finalPartATrade.bid.sellingVolume, agents[partA]))
+            continue;
+
+        floor->removeBids(partA, partB);
+        it.remove(partA, partB);
+
+        finalizeTrade(finalPartATrade);
+/*
+        TradeGame::Assets partAPost = agents[partA]->getAssets();
+        TradeGame::Assets partBPost = agents[partB]->getAssets();
+
+        assert(partAPost.platinum >= 0 && partAPost.gold >= 0 && partAPost.silver >= 0);
+        assert(partBPost.platinum >= 0 && partBPost.gold >= 0 && partBPost.silver >= 0);*/
     }
 }
 
@@ -127,7 +165,7 @@ TradeGame::Trade BlackBoard::resolveConflict(const TradeGame::Trade& seller, con
     TradeGame::Trade final = seller;
     final.buyer = buyer.seller;
     final.bid.buyingVolume = (seller.bid.buyingVolume + buyer.bid.sellingVolume) / 2;
-    final.bid.sellingVolume = (seller.bid.sellingVolume + buyer.bid.sellingVolume) / 2;
+    final.bid.sellingVolume = (seller.bid.sellingVolume + buyer.bid.buyingVolume) / 2;
     return final;
 }
 
@@ -135,11 +173,6 @@ void BlackBoard::finalizeTrade(TradeGame::Trade& trade)
 {
     TradeGame::Agent* seller = agents[trade.seller];
     TradeGame::Agent* buyer = agents[trade.buyer];
-
-    //verify assets
-    if(!verifyAssets(trade.bid.buyingType, trade.bid.buyingVolume, buyer) ||
-       !verifyAssets(trade.bid.sellingType, trade.bid.sellingVolume, seller))
-        return;
 
     //transfer
     TradeGame::Assets sellerChange = createSellerChange(trade.bid);
@@ -207,11 +240,12 @@ void BlackBoard::penalize()
             if(itH->seller == it->first || itH->buyer == it->first)
                 nrDeals++;
         }
-        //int totalDeals = history.size();
         TradeGame::Agent* agent = it->second;
         int silverLoss = -rFactor * (1.0 - (float(nrDeals) / iterations)) * initAssets[it->first].silver;
         int goldLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets[it->first].gold;
         int platinumLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets[it->first].platinum;
+
+        assert(silverLoss <= 0 && goldLoss <= 0 && platinumLoss <= 0);
 
         printf("Penalty for agent %s (%i / %i deals): %i, %i, %i\n", it->second->getName().c_str(), nrDeals, iterations, silverLoss, goldLoss, platinumLoss);
         agent->addAssets(silverLoss, goldLoss, platinumLoss);
@@ -222,4 +256,12 @@ void BlackBoard::penalize()
         TradeGame::Assets assets = it->second->getAssets();
         printf("Assets for agent %s: %i, %i, %i\n", it->second->getName().c_str(), assets.silver, assets.gold, assets.platinum);
     }
+}
+
+int BlackBoard::calculateAssetValue(const TradeGame::Assets& assets)
+{
+    int score = assets.platinum * BlackBoard::PLATINUM_VALUE;
+    score += assets.gold * BlackBoard::GOLD_VALUE;
+    score += assets.silver * BlackBoard::SILVER_VALUE;
+    return score;
 }

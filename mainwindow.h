@@ -21,9 +21,12 @@ private:
     BlackBoard * manager;
 
     void updateUI();
+    void updateRanking();
+    static bool agentSortPredicate(std::pair<unsigned int,TradeGame::Agent*> a, std::pair<unsigned int,TradeGame::Agent*> b);
 
 private slots:
     void btnStartRound();
+    void btnRestart();
 };
 
 #endif // MAINWINDOW_H
