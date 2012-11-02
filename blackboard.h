@@ -51,7 +51,7 @@ private:
     int iterations;
     unsigned int insertIndex;
     std::map<unsigned int,TradeGame::Agent*> agents;
-    std::map<unsigned int,TradeGame::Assets> initAssets;
+    //std::map<unsigned int,TradeGame::Assets> initAssets;
     TradingFloor* floor;
     BidList* bidList;
     std::vector<TradeGame::Trade> lastBids;

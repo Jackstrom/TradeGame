@@ -53,7 +53,7 @@ void BlackBoard::addAgent(TradeGame::Agent *agent)
     TradeGame::Assets assets = generateAssets();
     agent->setAssets(assets);
     printf("Agent %u initialized with assets %i, %i, %i\n", insertIndex, assets.silver, assets.gold, assets.platinum);
-    initAssets[insertIndex] = assets;
+    //initAssets[insertIndex] = assets;
     agents[insertIndex++] = agent;
 }
 
@@ -300,9 +300,10 @@ void BlackBoard::penalize()
                 nrDeals++;
         }
         TradeGame::Agent* agent = it->second;
-        int silverLoss = -rFactor * (1.0 - (float(nrDeals) / iterations)) * initAssets[it->first].silver;
-        int goldLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets[it->first].gold;
-        int platinumLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * initAssets[it->first].platinum;
+        const TradeGame::Assets& currentAssets = agent->getAssets();
+        int silverLoss = -rFactor * (1.0 - (float(nrDeals) / iterations)) * currentAssets.silver;
+        int goldLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * currentAssets.gold;
+        int platinumLoss = -rFactor * (1.0 - float(nrDeals) / iterations) * currentAssets.platinum;
 
         assert(silverLoss <= 0 && goldLoss <= 0 && platinumLoss <= 0);
 
