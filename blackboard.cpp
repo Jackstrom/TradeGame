@@ -41,6 +41,7 @@ void BlackBoard::restart()
         delete it->second;
     }
     agents.clear();
+    insertIndex = 0;
     history.clear();
     lastHistory.clear();
     lastBids.clear();
@@ -193,6 +194,35 @@ TradeGame::Trade BlackBoard::resolveConflict(const TradeGame::Trade& seller, con
     final.buyer = buyer.seller;
     final.bid.buyingVolume = (seller.bid.buyingVolume + buyer.bid.sellingVolume) / 2;
     final.bid.sellingVolume = (seller.bid.sellingVolume + buyer.bid.buyingVolume) / 2;
+
+    // validate and adjust new transaction against assets
+    TradeGame::Assets sellerAssets = agents.find(final.seller)->second->getAssets();
+    TradeGame::Assets buyerAssets = agents.find(final.buyer)->second->getAssets();
+    switch(final.bid.buyingType)
+    {
+    case TradeGame::SILVER:
+        final.bid.buyingVolume = std::min(int(final.bid.buyingVolume), buyerAssets.silver);
+        break;
+    case TradeGame::GOLD:
+        final.bid.buyingVolume = std::min(int(final.bid.buyingVolume), buyerAssets.gold);
+        break;
+    case TradeGame::PLATINUM:
+        final.bid.buyingVolume = std::min(int(final.bid.buyingVolume), buyerAssets.platinum);
+        break;
+    }
+    switch(final.bid.sellingType)
+    {
+    case TradeGame::SILVER:
+        final.bid.sellingVolume = std::min(int(final.bid.sellingVolume), sellerAssets.silver);
+        break;
+    case TradeGame::GOLD:
+        final.bid.sellingVolume = std::min(int(final.bid.sellingVolume), sellerAssets.gold);
+        break;
+    case TradeGame::PLATINUM:
+        final.bid.sellingVolume = std::min(int(final.bid.sellingVolume), sellerAssets.platinum);
+        break;
+    }
+
     return final;
 }
 

@@ -26,3 +26,7 @@ HEADERS  += mainwindow.h \
     bidlist.h
 
 FORMS    += mainwindow.ui
+
+#needed for newest cpp
+CCFLAG +=-std=gnu++0x
+QMAKE_CXXFLAGS +=-std=gnu++0x
