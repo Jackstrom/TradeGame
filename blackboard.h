@@ -45,7 +45,7 @@ private:
     bool verifyAssets(TradeGame::AssetType type, int amount, TradeGame::Agent* agent) const;
     TradeGame::Assets createSellerChange(const TradeGame::Bid& bid);
 
-    static const int TOTAL_ASSET_VALUE = 100;
+    static const int TOTAL_ASSET_VALUE = 9001;
 
     double rFactor;
     int iterations;

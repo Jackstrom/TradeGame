@@ -15,7 +15,12 @@ SOURCES += main.cpp\
     testagent.cpp \
     blackboard.cpp \
     tradingfloor.cpp \
-    bidlist.cpp
+    bidlist.cpp \
+    tf/tfagent.cpp \
+    gj/intercom.cpp \
+    gj/genalgocomm.cpp \
+    gj/bot123.cpp \
+    to/tradeAgent.cpp
 
 HEADERS  += mainwindow.h \
     types.h \
@@ -23,7 +28,12 @@ HEADERS  += mainwindow.h \
     agent.h \
     blackboard.h \
     tradingfloor.h \
-    bidlist.h
+    bidlist.h \
+    tf/tfagent.h \
+    gj/intercom.h \
+    gj/genalgocomm.h \
+    gj/bot123.h \
+    to/tradeAgent.h
 
 FORMS    += mainwindow.ui
 

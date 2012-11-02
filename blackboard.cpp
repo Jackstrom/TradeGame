@@ -5,6 +5,11 @@
 #include <assert.h>
 #include <cstdio>
 
+#include "tf/tfagent.h"
+#include "gj/bot123.h"
+
+#include "to/tradeAgent.h"
+
 BlackBoard::BlackBoard(QObject * parent) :
     QObject(parent),
     rFactor(0.2),
@@ -28,9 +33,63 @@ BlackBoard::~BlackBoard()
 
 void BlackBoard::init()
 {
-    for(unsigned int i=0; i<100; i++)
-    {
-        addAgent(new TestAgent());
+//    {   // Test agents
+//        for(unsigned int i=0; i<6; i++)
+//        {
+//            addAgent(new TestAgent());
+//        }
+//    }
+
+
+    {   // TF agents
+        TF::Agent *tfagent1 = new TF::Agent(0);
+        addAgent(tfagent1);
+
+        TF::Agent *tfagent2 = new TF::Agent(1);
+        addAgent(tfagent2);
+
+        TF::Agent *tfagent3 = new TF::Agent(2);
+        addAgent(tfagent3);
+
+        TF::Agent *tfagent4 = new TF::Agent(3);
+        addAgent(tfagent4);
+
+        TF::Agent *tfagent5 = new TF::Agent(4);
+        addAgent(tfagent5);
+
+        TF::Agent *tfagent6 = new TF::Agent(5);
+        addAgent(tfagent6);
+    }
+
+
+    {   // TØ agents
+        for (int i = 0; i<6; ++i)
+        {
+            std::vector<unsigned int> genom;
+
+            genom.push_back(rand()%3);
+            genom.push_back(rand()%3);
+            genom.push_back(rand()%101);
+            genom.push_back(rand()%101);
+            genom.push_back(rand()%101);
+            genom.push_back(rand()%101);
+            genom.push_back(rand()%101);
+            genom.push_back(rand()%101);
+
+            addAgent(new DNAOT::Agent(genom));
+        }
+    }
+
+    {   // GJ agents (Start the DNA unit after agents are created but before the trading begins)
+        // DNA unit can be found under project downloads on Github
+        addAgent(new TradeGame::Bot123("Ni"));
+        addAgent(new TradeGame::Bot123("Li"));
+        addAgent(new TradeGame::Bot123("Fe"));
+        addAgent(new TradeGame::Bot123("Mn"));
+        addAgent(new TradeGame::Bot123("Ca"));
+        addAgent(new TradeGame::Bot123("Ba"));
+//        addAgent(new TradeGame::Bot123("He"));
+//        addAgent(new TradeGame::Bot123("Ar"));
     }
 }
 
