@@ -117,7 +117,26 @@ void BlackBoard::inviteBidsAndAddToFloor()
     {
         unsigned int agent = it.next();
         TradeGame::Bid bid = agents[agent]->inviteBid();
-        floor->addBid(bid, agent);
+        TradeGame::Assets assets = agents[agent]->getAssets();
+        if(validateBid(bid, assets))
+            floor->addBid(bid, agent);
+    }
+}
+
+bool BlackBoard::validateBid(const TradeGame::Bid &bid, const TradeGame::Assets &assets)
+{
+    if(bid.sellingVolume == 0 || bid.buyingVolume == 0)
+        return false;
+    switch(bid.sellingType)
+    {
+    case TradeGame::SILVER:
+        return assets.silver >= int(bid.sellingVolume);
+    case TradeGame::GOLD:
+        return assets.gold >= int(bid.sellingVolume);
+    case TradeGame::PLATINUM:
+        return assets.platinum >= int(bid.sellingVolume);
+    default:
+        return false;
     }
 }
 

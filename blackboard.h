@@ -38,6 +38,7 @@ private:
     void addAgent(TradeGame::Agent* agent);
     TradeGame::Assets generateAssets() const;
     void inviteBidsAndAddToFloor();
+    bool validateBid(const TradeGame::Bid& bid, const TradeGame::Assets& assets);
     void presentBids(const bool retainData=false);
     TradeGame::Trade resolveConflict(const TradeGame::Trade& first, const TradeGame::Trade& second) const;
     void finalizeTrade(const TradeGame::Trade& trade, const bool retainData=false);
